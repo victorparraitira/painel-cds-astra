@@ -254,6 +254,9 @@ td.sub2{color:var(--ink-2);padding-left:22px}
 #pdfStage .why,#pdfStage .chip.hint,#pdfStage .tbtn,#pdfStage .ins-ic,#pdfStage 
 #printRoot{display:none}
 .inst-btn{flex:none}
+.side-btns{display:flex;gap:6px}.side-btns .btn{flex:1;min-width:0;justify-content:center;padding:0 8px;font-size:12.5px;gap:5px}.side-btns .btn svg{flex:none}.inst-side{display:none!important}
+@media (max-width:560px){html:not(.pdfmode) .inst-side{display:inline-flex!important}}
+@media (display-mode:standalone){.inst-side{display:none!important}}
 @media (display-mode:standalone){.inst-btn{display:none!important}}
 .inst-dlg{border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink);padding:0;width:min(440px,calc(100vw - 32px));box-shadow:var(--shadow)}
 .inst-dlg::backdrop{background:rgba(0,0,0,.45)}
@@ -313,7 +316,7 @@ html:not(.pdfmode) h1{font-size:18px;white-space:nowrap;overflow:hidden;text-ove
 html:not(.pdfmode) .ftog{display:inline-flex;max-width:52vw;font-size:12.5px}
 html:not(.pdfmode) .qbtns{flex-direction:row;order:1}html:not(.pdfmode) .ftog{order:2}html:not(.pdfmode) .filters{order:3}html:not(.pdfmode) .actions{order:4}
 html:not(.pdfmode) .qbtns .btn{height:34px}
-html:not(.pdfmode) .inst-btn{order:1;width:34px;padding:0;justify-content:center}html:not(.pdfmode) .inst-btn span{display:none}
+html:not(.pdfmode) .inst-btn{display:none}
 html:not(.pdfmode) .topbar:not(.fopen) #clrBtn{display:none}
 html:not(.pdfmode) .actions.stack{flex-direction:row}html:not(.pdfmode) .actions.stack .btn{height:34px}html:not(.pdfmode) .actions.stack .menu{top:40px}
 html:not(.pdfmode) .ftog span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -371,7 +374,10 @@ html:not(.pdfmode) .ins-body li{font-size:13px}}
     </nav>
     <div class="side-foot">
       <div id="srcInfo"></div>
-      <button class="btn" id="themeBtn" type="button" aria-label="Alternar tema"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span id="themeLbl">Tema</span></button>
+      <div class="side-btns">
+        <button class="btn" id="themeBtn" type="button" aria-label="Alternar tema"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span id="themeLbl">Tema</span></button>
+        <button class="btn inst-side" id="instSide" type="button" aria-label="Salvar atalho na tela de início"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg><span>Salvar atalho</span></button>
+      </div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -1299,7 +1305,7 @@ function boot(){
   const onSite=/(^|\.)github\.io$/.test(location.hostname);
   let instEvt=null;
   addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEvt=e});
-  addEventListener('appinstalled',()=>{instEvt=null;ib.hidden=true});
+  addEventListener('appinstalled',()=>{instEvt=null;ib.hidden=true;document.getElementById('instSide').hidden=true});
   if(onSite&&'serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
   const SH='<svg class="inst-ico" viewBox="0 0 24 24"><path d="M12 15V3m0 0-4 4m4-4 4 4"/><path d="M6 10H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1"/></svg>';
   const instHtml=()=>{
@@ -1312,12 +1318,17 @@ function boot(){
     if(/Safari\//.test(ua)&&!mob)return `<p>No Safari do Mac:</p><ol><li>Abra o menu <b>Arquivo</b> (ou Compartilhar ${SH}).</li><li>Escolha <b>Adicionar ao Dock</b>.</li></ol>`;
     return `<p>Arraste o cadeado da barra de endereço para a área de trabalho para criar o atalho.</p><p>Para instalar como app, com o logo do painel, abra este link no Chrome ou no Edge.</p>`;
   };
-  ib.onclick=async()=>{
+  const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const isMob=()=>isIOS()||/Android/i.test(navigator.userAgent);
+  const instGo=async()=>{
     if(instEvt){const e=instEvt;instEvt=null;try{await e.prompt();await e.userChoice}catch(_){}return}
+    if(!onSite&&isMob()){window.open(SITE+'?salvar=1','_blank','noopener');return}
     iB.innerHTML=instHtml();const c=document.getElementById('instCopy');
     if(c)c.onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(SITE):Promise.reject()).then(()=>{c.textContent='Link copiado'},()=>{prompt('Copie o link:',SITE)})};
     if(idlg.showModal)idlg.showModal();else idlg.setAttribute('open','');
   };
+  ib.onclick=instGo;document.getElementById('instSide').onclick=()=>{if(window.closeSide)closeSide();instGo()};
+  if(onSite&&/[?&]salvar=1/.test(location.search)&&!instEvt){setTimeout(()=>{if(!instEvt&&isMob())instGo()},1500)}
   document.getElementById('instX').onclick=()=>idlg.close?idlg.close():idlg.removeAttribute('open');
   idlg.addEventListener('click',e=>{if(e.target===idlg)idlg.close()});
   document.getElementById('pdfBtn').onclick=genPDF;
