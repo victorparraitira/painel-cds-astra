@@ -253,6 +253,20 @@ td.sub2{color:var(--ink-2);padding-left:22px}
 #pdfStage .pdf-r{font-size:11.5px;color:var(--ink-2);text-align:right;line-height:1.5}
 #pdfStage .why,#pdfStage .chip.hint,#pdfStage .tbtn,#pdfStage .ins-ic,#pdfStage 
 #printRoot{display:none}
+.inst-btn{flex:none}
+@media (display-mode:standalone){.inst-btn{display:none!important}}
+.inst-dlg{border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink);padding:0;width:min(440px,calc(100vw - 32px));box-shadow:var(--shadow)}
+.inst-dlg::backdrop{background:rgba(0,0,0,.45)}
+.inst-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 6px}
+.inst-h h2{font-family:var(--f-display);font-size:18px;margin:0}
+.inst-b{padding:4px 20px 20px;font-size:14px;line-height:1.5}
+.inst-b p{margin:8px 0;color:var(--ink-2)}
+.inst-b ol{margin:8px 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.inst-b b{color:var(--ink)}
+.inst-b .inst-go{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.inst-b .inst-go .btn{text-decoration:none;color:inherit}.inst-b .inst-go .btn.primary{color:#fff}
+.inst-ico{display:inline-block;width:16px;height:16px;vertical-align:-3px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
 @media print{
   @page{size:A4 portrait;margin:8mm}
   html.printing body>*:not(#printRoot){display:none!important}
@@ -299,6 +313,7 @@ html:not(.pdfmode) h1{font-size:18px;white-space:nowrap;overflow:hidden;text-ove
 html:not(.pdfmode) .ftog{display:inline-flex;max-width:52vw;font-size:12.5px}
 html:not(.pdfmode) .qbtns{flex-direction:row;order:1}html:not(.pdfmode) .ftog{order:2}html:not(.pdfmode) .filters{order:3}html:not(.pdfmode) .actions{order:4}
 html:not(.pdfmode) .qbtns .btn{height:34px}
+html:not(.pdfmode) .inst-btn{order:1;width:34px;padding:0;justify-content:center}html:not(.pdfmode) .inst-btn span{display:none}
 html:not(.pdfmode) .topbar:not(.fopen) #clrBtn{display:none}
 html:not(.pdfmode) .actions.stack{flex-direction:row}html:not(.pdfmode) .actions.stack .btn{height:34px}html:not(.pdfmode) .actions.stack .menu{top:40px}
 html:not(.pdfmode) .ftog span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -393,10 +408,12 @@ html:not(.pdfmode) .ins-body li{font-size:13px}}
           <button type="button" data-exp="csv"><span>Dados do módulo (CSV)</span><small>Tabela do módulo atual com o filtro aplicado</small></button>
         </div>
       </div>
+      <button class="btn inst-btn" id="instBtn" type="button" title="Salvar atalho na área de trabalho ou na tela de início" aria-label="Salvar atalho"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg><span>Salvar atalho</span></button>
     </header>
     <main class="content" id="content"></main>
   </div>
 </div>
+<dialog class="inst-dlg" id="instDlg" aria-labelledby="instT"><div class="inst-h"><h2 id="instT">Salvar atalho</h2><button class="ins-x" type="button" id="instX" aria-label="Fechar">✕</button></div><div class="inst-b" id="instB"></div></dialog>
 <div class="ins-bg" id="insBg" hidden></div><aside class="ins" id="ins" role="dialog" aria-modal="true" aria-labelledby="insLbl" hidden><div class="ins-h"><div><div class="ins-kick">Insights do cartão</div><div class="ins-lbl" id="insLbl"></div><div class="ins-val"></div><div class="ins-ctx"></div></div><button class="ins-x" type="button" aria-label="Fechar">✕</button></div><div class="ins-body"></div><p class="ins-foot">Calculado a partir da planilha Expedição IA, com os filtros atuais.</p></aside>
 <div id="printRoot" aria-hidden="true"></div>
 <div class="pdf-busy" id="pdfBusy" hidden><div><i></i><span>Gerando PDF…</span></div></div>
@@ -1276,6 +1293,33 @@ function boot(){
   // menu mobile
   const side=document.getElementById('side'),scrim=document.getElementById('scrim');
   window.closeSide=()=>{side.classList.remove('open');scrim.hidden=true};
+  // salvar atalho (instalar como app)
+  const SITE='https://victorparraitira.github.io/painel-cds-astra/';
+  const ib=document.getElementById('instBtn'),idlg=document.getElementById('instDlg'),iB=document.getElementById('instB');
+  const onSite=/(^|\.)github\.io$/.test(location.hostname);
+  let instEvt=null;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEvt=e});
+  addEventListener('appinstalled',()=>{instEvt=null;ib.hidden=true});
+  if(onSite&&'serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  const SH='<svg class="inst-ico" viewBox="0 0 24 24"><path d="M12 15V3m0 0-4 4m4-4 4 4"/><path d="M6 10H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1"/></svg>';
+  const instHtml=()=>{
+    const ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),and=/Android/i.test(ua),mob=ios||and;
+    if(!onSite)return `<p>Este link abre o painel dentro do Claude, e o navegador não deixa salvar o atalho daqui.</p><p>Abra o site do painel e toque de novo em <b>Salvar atalho</b>. O atalho já vem com o logo do painel.</p><div class="inst-go"><a class="btn primary" href="${SITE}" target="_blank" rel="noopener">Abrir o site do painel</a><button class="btn" type="button" id="instCopy">Copiar link</button></div>`;
+    if(ios)return `<p>No iPhone ou iPad, o atalho é salvo pelo menu Compartilhar:</p><ol><li>Toque em <b>Compartilhar</b> ${SH} na barra do navegador.</li><li>Escolha <b>Adicionar à Tela de Início</b>.</li><li>Toque em <b>Adicionar</b>.</li></ol><p>O ícone do painel aparece na tela de início.</p>`;
+    if(and)return `<p>No Android:</p><ol><li>Toque no menu <b>⋮</b> do navegador.</li><li>Escolha <b>Adicionar à tela inicial</b> (ou <b>Instalar app</b>).</li><li>Confirme em <b>Adicionar</b>.</li></ol>`;
+    if(/Edg\//.test(ua))return `<p>No Edge:</p><ol><li>Abra o menu <b>…</b> no canto superior direito.</li><li>Vá em <b>Aplicativos</b> &gt; <b>Instalar este site como um aplicativo</b>.</li><li>Clique em <b>Instalar</b> e marque <b>Criar atalho na área de trabalho</b>.</li></ol>`;
+    if(/Chrome\//.test(ua))return `<p>No Chrome:</p><ol><li>Clique no ícone de instalar na barra de endereço, ou abra o menu <b>⋮</b> &gt; <b>Transmitir, salvar e compartilhar</b> &gt; <b>Instalar página como app</b>.</li><li>Clique em <b>Instalar</b>.</li></ol><p>O painel abre em janela própria e ganha atalho na área de trabalho e no menu Iniciar.</p>`;
+    if(/Safari\//.test(ua)&&!mob)return `<p>No Safari do Mac:</p><ol><li>Abra o menu <b>Arquivo</b> (ou Compartilhar ${SH}).</li><li>Escolha <b>Adicionar ao Dock</b>.</li></ol>`;
+    return `<p>Arraste o cadeado da barra de endereço para a área de trabalho para criar o atalho.</p><p>Para instalar como app, com o logo do painel, abra este link no Chrome ou no Edge.</p>`;
+  };
+  ib.onclick=async()=>{
+    if(instEvt){const e=instEvt;instEvt=null;try{await e.prompt();await e.userChoice}catch(_){}return}
+    iB.innerHTML=instHtml();const c=document.getElementById('instCopy');
+    if(c)c.onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(SITE):Promise.reject()).then(()=>{c.textContent='Link copiado'},()=>{prompt('Copie o link:',SITE)})};
+    if(idlg.showModal)idlg.showModal();else idlg.setAttribute('open','');
+  };
+  document.getElementById('instX').onclick=()=>idlg.close?idlg.close():idlg.removeAttribute('open');
+  idlg.addEventListener('click',e=>{if(e.target===idlg)idlg.close()});
   document.getElementById('pdfBtn').onclick=genPDF;
   document.getElementById('fTog').onclick=()=>{const t=document.querySelector('.topbar');const o=t.classList.toggle('fopen');document.getElementById('fTog').setAttribute('aria-expanded',String(o))};
   document.getElementById('menuBtn').onclick=()=>{side.classList.add('open');scrim.hidden=false};scrim.onclick=closeSide;
