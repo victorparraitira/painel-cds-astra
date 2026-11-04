@@ -254,10 +254,10 @@ td.sub2{color:var(--ink-2);padding-left:22px}
 #pdfStage .why,#pdfStage .chip.hint,#pdfStage .tbtn,#pdfStage .ins-ic,#pdfStage 
 #printRoot{display:none}
 .inst-btn{flex:none}
-.side-btns{display:flex;gap:6px}.side-btns .btn{flex:1;min-width:0;justify-content:center;padding:0 8px;font-size:12.5px;gap:5px}.side-btns .btn svg{flex:none}.inst-side{display:none!important}
-@media (max-width:560px){html:not(.pdfmode) .inst-side{display:inline-flex!important}}
-@media (display-mode:standalone){.inst-side{display:none!important}}
+.side-btns{display:flex;flex-direction:column;gap:8px}.inst-btn{display:none!important}
+
 @media (display-mode:standalone){.inst-btn{display:none!important}}
+@media (display-mode:standalone){.inst-side{display:none!important}}
 .inst-dlg{border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink);padding:0;width:min(440px,calc(100vw - 32px));box-shadow:var(--shadow)}
 .inst-dlg::backdrop{background:rgba(0,0,0,.45)}
 .inst-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 6px}
@@ -376,7 +376,7 @@ html:not(.pdfmode) .ins-body li{font-size:13px}}
       <div id="srcInfo"></div>
       <div class="side-btns">
         <button class="btn" id="themeBtn" type="button" aria-label="Alternar tema"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span id="themeLbl">Tema</span></button>
-        <button class="btn inst-side" id="instSide" type="button" aria-label="Salvar atalho na tela de início"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg><span>Salvar atalho</span></button>
+        <button class="btn inst-side" id="instSide" type="button" aria-label="Salvar painel na tela de início"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg><span>Salvar painel</span></button>
       </div>
     </div>
   </aside>
@@ -414,12 +414,12 @@ html:not(.pdfmode) .ins-body li{font-size:13px}}
           <button type="button" data-exp="csv"><span>Dados do módulo (CSV)</span><small>Tabela do módulo atual com o filtro aplicado</small></button>
         </div>
       </div>
-      <button class="btn inst-btn" id="instBtn" type="button" title="Salvar atalho na área de trabalho ou na tela de início" aria-label="Salvar atalho"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg><span>Salvar atalho</span></button>
+      <button class="btn inst-btn" id="instBtn" type="button" title="Salvar o painel na área de trabalho ou na tela de início" aria-label="Salvar painel"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg><span>Salvar painel</span></button>
     </header>
     <main class="content" id="content"></main>
   </div>
 </div>
-<dialog class="inst-dlg" id="instDlg" aria-labelledby="instT"><div class="inst-h"><h2 id="instT">Salvar atalho</h2><button class="ins-x" type="button" id="instX" aria-label="Fechar">✕</button></div><div class="inst-b" id="instB"></div></dialog>
+<dialog class="inst-dlg" id="instDlg" aria-labelledby="instT"><div class="inst-h"><h2 id="instT">Salvar painel</h2><button class="ins-x" type="button" id="instX" aria-label="Fechar">✕</button></div><div class="inst-b" id="instB"></div></dialog>
 <div class="ins-bg" id="insBg" hidden></div><aside class="ins" id="ins" role="dialog" aria-modal="true" aria-labelledby="insLbl" hidden><div class="ins-h"><div><div class="ins-kick">Insights do cartão</div><div class="ins-lbl" id="insLbl"></div><div class="ins-val"></div><div class="ins-ctx"></div></div><button class="ins-x" type="button" aria-label="Fechar">✕</button></div><div class="ins-body"></div><p class="ins-foot">Calculado a partir da planilha Expedição IA, com os filtros atuais.</p></aside>
 <div id="printRoot" aria-hidden="true"></div>
 <div class="pdf-busy" id="pdfBusy" hidden><div><i></i><span>Gerando PDF…</span></div></div>
@@ -1310,7 +1310,7 @@ function boot(){
   const SH='<svg class="inst-ico" viewBox="0 0 24 24"><path d="M12 15V3m0 0-4 4m4-4 4 4"/><path d="M6 10H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1"/></svg>';
   const instHtml=()=>{
     const ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),and=/Android/i.test(ua),mob=ios||and;
-    if(!onSite)return `<p>Este link abre o painel dentro do Claude, e o navegador não deixa salvar o atalho daqui.</p><p>Abra o site do painel e toque de novo em <b>Salvar atalho</b>. O atalho já vem com o logo do painel.</p><div class="inst-go"><a class="btn primary" href="${SITE}" target="_blank" rel="noopener">Abrir o site do painel</a><button class="btn" type="button" id="instCopy">Copiar link</button></div>`;
+    if(!onSite)return `<p>Este link abre o painel dentro do Claude, e o navegador não deixa salvar o atalho daqui.</p><p>Abra o site do painel e toque de novo em <b>Salvar painel</b>. O atalho já vem com o logo do painel.</p><div class="inst-go"><a class="btn primary" href="${SITE}" target="_blank" rel="noopener">Abrir o site do painel</a><button class="btn" type="button" id="instCopy">Copiar link</button></div>`;
     if(ios)return `<p>No iPhone ou iPad, o atalho é salvo pelo menu Compartilhar:</p><ol><li>Toque em <b>Compartilhar</b> ${SH} na barra do navegador.</li><li>Escolha <b>Adicionar à Tela de Início</b>.</li><li>Toque em <b>Adicionar</b>.</li></ol><p>O ícone do painel aparece na tela de início.</p>`;
     if(and)return `<p>No Android:</p><ol><li>Toque no menu <b>⋮</b> do navegador.</li><li>Escolha <b>Adicionar à tela inicial</b> (ou <b>Instalar app</b>).</li><li>Confirme em <b>Adicionar</b>.</li></ol>`;
     if(/Edg\//.test(ua))return `<p>No Edge:</p><ol><li>Abra o menu <b>…</b> no canto superior direito.</li><li>Vá em <b>Aplicativos</b> &gt; <b>Instalar este site como um aplicativo</b>.</li><li>Clique em <b>Instalar</b> e marque <b>Criar atalho na área de trabalho</b>.</li></ol>`;
