@@ -1106,6 +1106,11 @@ function mEstoque(){
   h+=chartCard({title:'Valor por tipo de operação',sub:'Posição de '+dFmt(sd)+', na ordem da planilha · locais com saldo zero não aparecem',span:6,h:190,fmt:F.brlC,
     why:'rosca de participação no valor; só entram locais com saldo, na ordem da planilha.',
     cfg:c=>donutCfg(lab,vals,lab.map((_,i)=>i<shown.length?c.s[i]:c.other),c,F.brlC)}).replace('</canvas></div>','</canvas></div>'+donutLegend(lab,vals,colVar,F.brlC));
+  const SKU_TOT3=['FRIGORÍFICO','CD BARIRI - REVENDA','NOROESTE ME'];
+  const tSku=sum(nz.filter(r=>SKU_TOT3.includes(D.tipos[r.t])),r=>r.sku),tCx=sum(nz,r=>r.cx),tKg=sum(nz,r=>r.kg),tVal=sum(nz,r=>r.val);
+  h+=tableCard({title:'Total de estoque',sub:'Posição de '+dFmt(sd)+' · soma de todas as operações com saldo',span:12,head:['Total','SKUs','Caixas','KG','Valor','R$/KG'],
+    rows:[[{v:'Total do estoque',cls:'tot'},{v:F.n(tSku),cls:'tot'},{v:F.n(tCx),cls:'tot'},{v:F.n(tKg),cls:'tot'},{v:F.brl(tVal),cls:'tot'},{v:F.brl2(div(tVal,tKg)),cls:'tot'}]],
+    why:'os SKUs somam só Frigorífico, CD Bariri Revenda e Noroeste ME; caixas, KG e valor somam todas as operações.'});
   const mx=Math.max(0,...rr.map(r=>r.val||0));
   h+=tableCard({title:'Estoque por tipo de operação',sub:'Posição de '+dFmt(sd)+', na ordem da planilha · locais com saldo zero não aparecem',span:12,head:['Operação','SKUs','Caixas','KG','Valor','R$/KG'],
     rows:nz.map(r=>[D.tipos[r.t],F.n(r.sku),F.n(r.cx),F.n(r.kg),barCell(r.val,mx,F.brlC(r.val)),F.brl2(div(r.val,r.kg))]),
