@@ -158,6 +158,9 @@ input[type=date]{width:134px}
 .rvc td.n{font-family:var(--rv-mono);font-variant-numeric:tabular-nums}
 .rvc tbody tr{height:38px}.rvc tr.tot{background:var(--rv-tot);font-weight:700}.rvc tr.tot td{border-top:2px solid var(--line)}
 .rvc .gap,.rvc th.gap{width:6px;padding:0;border:0;background:transparent}
+.rvc .tw:has(.rvmain){padding:0}.rvc .rvmain td:first-child,.rvc .rvmain th:first-child{position:sticky;left:0;z-index:2;background:var(--surface);width:6px;min-width:6px}
+.rvc .rvmain td:nth-child(2),.rvc .rvmain thead tr:nth-child(2) th:nth-child(2),.rvc .rvmain thead tr:first-child th:nth-child(2){position:sticky;left:6px;z-index:2;background:var(--surface);box-shadow:6px 0 6px -6px rgba(0,0,0,.25)}
+.rvc .rvmain thead th:nth-child(2){background:var(--surface-2)}.rvc .rvmain tr.tot td:nth-child(2),.rvc .rvmain tr.tot td:first-child{background:linear-gradient(var(--rv-tot),var(--rv-tot)),var(--surface)}
 
 .rvk .v{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:560px){.rvk .v{font-size:18px}.rvk{padding:12px}}
