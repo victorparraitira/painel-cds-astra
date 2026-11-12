@@ -759,7 +759,7 @@ const PAL_CAP=[
   {u:351,cap:184,nm:'Sto Antônio',locs:['CD STO ANTÔNIO']},
 ];
 // Locais que entram no total de SKUs do Resumo (definido pelo Victor em 06/10/26)
-const SKU_TOT=['FRIGORÍFICO','CD BARIRI - PROD. ACABADO','CD BARIRI - REVENDA','NOROESTE ME'];
+const SKU_TOT=['FRIGORÍFICO','CD BARIRI - REVENDA','NOROESTE ME'];
 function mResumo(){
   const R=[S.from,S.to],CR=cmpRange();
   let h=ctxLine(S.unit!=='all'?'<span class="chip">Este resumo mostra sempre os 3 CDs</span>':'');
@@ -813,7 +813,7 @@ function mResumo(){
     const skuT=sum(rr.filter(r=>SKU_TOT.includes(D.tipos[r.t])),r=>r.sku);
     er.push([{v:'Total',cls:'tot'},{v:F.n(skuT),cls:'tot'},{v:F.n(t.cx),cls:'tot'},{v:F.n(t.kg),cls:'tot'},{v:F.brl(t.val),cls:'tot'}]);
     h+=tableCard({title:'Resumo de estoque por local de armazenagem',sub:'Posição de '+dFmt(sd)+', na ordem da planilha · locais com saldo zero não aparecem',head:['Local','SKUs','Caixas','Peso (kg)','Valor (R$)'],rows:er,
-      why:'tabela para leitura exata do saldo de cada local. O total de SKUs soma só Frigorífico, CD Bariri Prod. Acabado, CD Bariri Revenda e Noroeste ME; caixas, peso e valor somam todos os locais.'});
+      why:'tabela para leitura exata do saldo de cada local. O total de SKUs soma só Frigorífico, CD Bariri Revenda e Noroeste ME; caixas, peso e valor somam todos os locais.'});
   } else h+=`<section class="card span-12"><div class="empty">Sem posição de estoque válida no período.</div></section>`;
   h+=`</div>`;
   const ER=estRef(R);const pd=[...EST_D.keys()].filter(d=>d<=ER[0]&&(!ER[1]||d>=ER[1])&&EST_D.get(d).some(r=>r.pal!=null)).sort().pop();
@@ -1084,7 +1084,7 @@ function mEstoque(){
    ${kpi({ins:{t:'est',k:'val',f:'brl'},label:'Valor armazenado',value:F.brlK(a.val),d:pd?delta(a.val,p.val):'',sp:snapSeries(x=>x.val),hero:true,sub:F.brl(a.val)})}
    ${kpi({ins:{t:'est',k:'cx',f:'n'},label:'Caixas',value:F.cK(a.cx),d:pd?delta(a.cx,p.cx):'',sp:snapSeries(x=>x.cx),sub:F.n(a.cx)})}
    ${kpi({ins:{t:'est',k:'kg',f:'kg'},label:'KG',value:F.cK(a.kg),unit:'kg',d:pd?delta(a.kg,p.kg):'',sp:snapSeries(x=>x.kg),sub:F.n(a.kg/1000)+' toneladas'})}
-   ${kpi({ins:{t:'est',k:'sku',f:'n'},label:'SKUs',value:F.n(a.sku),d:pd?delta(a.sku,p.sku):'',sp:snapSeries(x=>x.sku),sub:'Frigorífico, Bariri e Noroeste ME',info:'Soma dos SKUs só de Frigorífico, CD Bariri Prod. Acabado, CD Bariri Revenda e Noroeste ME.'})}
+   ${kpi({ins:{t:'est',k:'sku',f:'n'},label:'SKUs',value:F.n(a.sku),d:pd?delta(a.sku,p.sku):'',sp:snapSeries(x=>x.sku),sub:'Frigorífico, Bariri Revenda e Noroeste ME',info:'Soma dos SKUs só de Frigorífico, CD Bariri Revenda e Noroeste ME.'})}
    ${kpi({ins:{t:'est',k:'vkg',f:'brl2'},label:'Valor médio por KG',value:F.brl2(div(a.val,a.kg)),d:pd?delta(div(a.val,a.kg),div(p.val,p.kg)):''})}
    ${kpi({ins:{t:'pal',cap:0},label:'Posições palete',value:a.pal!=null?F.n(a.pal):'—',sub:a.pal!=null?'Informado só para parte das operações':'Não informado nesta data'})}
   </div>`;
@@ -1106,8 +1106,7 @@ function mEstoque(){
   h+=chartCard({title:'Valor por tipo de operação',sub:'Posição de '+dFmt(sd)+', na ordem da planilha · locais com saldo zero não aparecem',span:6,h:190,fmt:F.brlC,
     why:'rosca de participação no valor; só entram locais com saldo, na ordem da planilha.',
     cfg:c=>donutCfg(lab,vals,lab.map((_,i)=>i<shown.length?c.s[i]:c.other),c,F.brlC)}).replace('</canvas></div>','</canvas></div>'+donutLegend(lab,vals,colVar,F.brlC));
-  const SKU_TOT3=['FRIGORÍFICO','CD BARIRI - REVENDA','NOROESTE ME'];
-  const tSku=sum(nz.filter(r=>SKU_TOT3.includes(D.tipos[r.t])),r=>r.sku),tCx=sum(nz,r=>r.cx),tKg=sum(nz,r=>r.kg),tVal=sum(nz,r=>r.val);
+  const tSku=sum(nz.filter(r=>SKU_TOT.includes(D.tipos[r.t])),r=>r.sku),tCx=sum(nz,r=>r.cx),tKg=sum(nz,r=>r.kg),tVal=sum(nz,r=>r.val);
   h+=tableCard({title:'Total de estoque',sub:'Posição de '+dFmt(sd)+' · soma de todas as operações com saldo',span:12,head:['Total','SKUs','Caixas','KG','Valor','R$/KG'],
     rows:[[{v:'Total do estoque',cls:'tot'},{v:F.n(tSku),cls:'tot'},{v:F.n(tCx),cls:'tot'},{v:F.n(tKg),cls:'tot'},{v:F.brl(tVal),cls:'tot'},{v:F.brl2(div(tVal,tKg)),cls:'tot'}]],
     why:'os SKUs somam só Frigorífico, CD Bariri Revenda e Noroeste ME; caixas, KG e valor somam todas as operações.'});
